@@ -4,7 +4,7 @@ import uuid
 from Modelos.Productos import Producto
 
 
-def mostrar_formulario(ventana):
+def mostrar_formulario(ventana, tabla):
     formulario = tk.Frame(ventana)
     formulario.pack()
 
@@ -33,10 +33,7 @@ def mostrar_formulario(ventana):
     labelCodigoBarra.grid(row=4, column=0)
     inputCodigoBarra.grid(row=4, column=1)
 
-    labelDescripcion = tk.Label(formulario, text="Descripcion")
-    inputDescripcion = tk.Entry(formulario)
-    labelDescripcion.grid(row=5, column=0)
-    inputDescripcion.grid(row=5, column=1)
+
 
     def generar_id():
         return str(uuid.uuid4())
@@ -47,11 +44,27 @@ def mostrar_formulario(ventana):
         stock = int(inputStock.get())
         categoria = inputCategoria.get()
         codigoBarra = inputCodigoBarra.get()
-        descripcion = inputDescripcion.get()
+        descripcion = ""
         
         id_producto = generar_id()
         
         Producto(nombre,precio,stock,descripcion,categoria,id_producto,codigoBarra)
+        print(len(Producto.productos))
+        
+
+        tabla.insert(
+            "",
+            tk.END,
+            iid=id_producto,
+            values=(
+                nombre,
+                precio,
+                stock,
+                categoria,
+                codigoBarra
+            )
+        )
+
 
         
     

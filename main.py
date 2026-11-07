@@ -1,10 +1,18 @@
 import tkinter as tk
 from Vistas.FormProducto import mostrar_formulario
+from Vistas.TablaProducto import mostrar_tabla
 
 ventana = tk.Tk()
 ventana.title("Gestor de productos")
-ventana.geometry("600x500")
+ventana.geometry("700x600")
 
-mostrar_formulario(ventana)
+contenedorFormulario = tk.Frame(ventana)
+contenedorFormulario.pack(side="top", fill="x")
+
+contenedorTabla = tk.Frame(ventana)
+contenedorTabla.pack(side="top", fill="both", expand=True)
+
+tabla = mostrar_tabla(contenedorTabla)
+mostrar_formulario(contenedorFormulario, tabla)
 
 ventana.mainloop()
