@@ -45,7 +45,12 @@ def mostrar_formulario(ventana, tabla):
         categoria = inputCategoria.get()
         codigoBarra = inputCodigoBarra.get()
         descripcion = ""
-        
+    
+        for p in Producto.productos:
+            if str(p.getCodigoBarra()).strip() == codigoBarra.strip():
+                from tkinter import messagebox
+                messagebox.showerror("Código duplicado", f"El código '{codigoBarra}' ya pertenece al producto: {p.getNombre()}")
+                return
         id_producto = generar_id()
         
         Producto(nombre,precio,stock,descripcion,categoria,id_producto,codigoBarra)

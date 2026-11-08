@@ -10,7 +10,23 @@ from tkinter import ttk
 def mostrar_tabla(ventana):
     contenedor = tk.Frame(ventana)
     contenedor.pack(fill="both", expand=True)
+    contenedorBusqueda = tk.Frame(contenedor)
+    contenedorBusqueda.pack(fill="x", pady=5)
 
+    tk.Label(contenedorBusqueda, text="Código de Barra:").pack(side="left", padx=5)
+    entryBusqueda = tk.Entry(contenedorBusqueda)
+    entryBusqueda.pack(side="left", padx=5)
+
+    def buscar_producto():
+        codigo = entryBusqueda.get().strip()
+        for item in tabla.get_children():
+            tabla.delete(item)
+        for p in Producto.productos:
+            if codigo == "" or str(p.getCodigoBarra()) == codigo:
+                tabla.insert("", "end", iid=p.getId(), values=(p.getNombre(), p.getPrecio(), p.getStock(), p.getCategoria(), p.getCodigoBarra()))
+
+    tk.Button(contenedorBusqueda, text="Buscar", command=buscar_producto).pack(side="left", padx=5)
+    entryBusqueda.bind("<Return>", lambda event: buscar_producto())
     tabla = ttk.Treeview(
         contenedor,
         columns=("Nombre", "Precio", "Stock", "Categoria", "Codigo de Barra"),
