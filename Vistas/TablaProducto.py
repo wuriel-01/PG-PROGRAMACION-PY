@@ -1,36 +1,104 @@
-import tkinter as tk
-from tkinter import ttk
-from Modelos.Productos import Producto
-from Vistas.FormEditarProducto import abrir_formulario_edicion
 
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
+from Modelos.Productos import Producto
+from Vistas.FormEditarProducto import abrir_formulario_edicion
 
 
 def mostrar_tabla(ventana):
     contenedor = tk.Frame(ventana)
     contenedor.pack(fill="both", expand=True)
+
     contenedorBusqueda = tk.Frame(contenedor)
     contenedorBusqueda.pack(fill="x", pady=5)
 
-    tk.Label(contenedorBusqueda, text="Código de Barra:").pack(side="left", padx=5)
+    tk.Label(
+        contenedorBusqueda,
+        text="Código de Barra:"
+    ).pack(side="left", padx=5)
+
     entryBusqueda = tk.Entry(contenedorBusqueda)
     entryBusqueda.pack(side="left", padx=5)
 
-    def buscar_producto():
-        codigo = entryBusqueda.get().strip()
-        for item in tabla.get_children():
-            tabla.delete(item)
-        for p in Producto.productos:
-            if codigo == "" or str(p.getCodigoBarra()) == codigo:
-                tabla.insert("", "end", iid=p.getId(), values=(p.getNombre(), p.getPrecio(), p.getStock(), p.getCategoria(), p.getCodigoBarra()))
-
-    tk.Button(contenedorBusqueda, text="Buscar", command=buscar_producto).pack(side="left", padx=5)
-    entryBusqueda.bind("<Return>", lambda event: buscar_producto())
     tabla = ttk.Treeview(
         contenedor,
-        columns=("Nombre", "Precio", "Stock", "Categoria", "Codigo de Barra"),
+        columns=("Nombre", "Precio", "Stock", "Categoria", "Codigo de Barra", "Estado"),
         show="headings"
+    )
+
+    def obtener_estado_stock(stock):
+        if stock == 0:
+            return "Sin stock"
+        elif stock <= 5:
+            return "Stock bajo"
+        else:
+            return "Disponible"
+
+    def cargar_productos():
+        for elemento in tabla.get_children():
+            tabla.delete(elemento)
+
+        for producto in Producto.productos:
+            estado = obtener_estado_stock(producto.getStock())
+
+            tabla.insert(
+                "",
+                tk.END,
+                iid=producto.getId(),
+                values=(
+                    producto.getNombre(),
+                    producto.getPrecio(),
+                    producto.getStock(),
+                    producto.getCategoria(),
+                    producto.getCodigoBarra(),
+                    estado
+                )
+            )
+
+    def buscar_producto():
+        codigo = entryBusqueda.get().strip()
+
+        for item in tabla.get_children():
+            tabla.delete(item)
+
+        for p in Producto.productos:
+            if codigo == "" or str(p.getCodigoBarra()).strip() == codigo:
+                estado = obtener_estado_stock(p.getStock())
+
+                tabla.insert(
+                    "",
+                    "end",
+                    iid=p.getId(),
+                    values=(
+                        p.getNombre(),
+                        p.getPrecio(),
+                        p.getStock(),
+                        p.getCategoria(),
+                        p.getCodigoBarra(),
+                        estado
+                    )
+                )
+
+    def mostrar_todos():
+        entryBusqueda.delete(0, tk.END)
+        cargar_productos()
+
+    tk.Button(
+        contenedorBusqueda,
+        text="Buscar",
+        command=buscar_producto
+    ).pack(side="left", padx=5)
+
+    tk.Button(
+        contenedorBusqueda,
+        text="Mostrar todos",
+        command=mostrar_todos
+    ).pack(side="left", padx=5)
+
+    entryBusqueda.bind(
+        "<Return>",
+        lambda event: buscar_producto()
     )
 
     tabla.heading("Nombre", text="Nombre")
@@ -38,6 +106,7 @@ def mostrar_tabla(ventana):
     tabla.heading("Stock", text="Stock")
     tabla.heading("Categoria", text="Categoria")
     tabla.heading("Codigo de Barra", text="Codigo de Barra")
+    tabla.heading("Estado", text="Estado")
 
     scrollbar = ttk.Scrollbar(
         contenedor,
@@ -50,29 +119,38 @@ def mostrar_tabla(ventana):
     tabla.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
+    cargar_productos()
+
     contenedorBotones = tk.Frame(ventana)
     contenedorBotones.pack()
 
     def editar_producto():
-        idProductoSeleccionado= tabla.selection()[0]
-        print(idProductoSeleccionado)
-        if idProductoSeleccionado != "":
-            abrir_formulario_edicion(idProductoSeleccionado, tabla)                  
-        else: print ('no hay producto seleccionado')
+        seleccion = tabla.selection()
 
+        if not seleccion:
+            messagebox.showerror("Error", "Producto no seleccionado")
+            return
+
+        idProductoSeleccionado = seleccion[0]
+        abrir_formulario_edicion(idProductoSeleccionado, tabla)
 
     def eliminar_producto():
-        idProductoSeleccionado= tabla.selection()[0]
-        if idProductoSeleccionado != "":
-         for producto in Producto.productos:
-            if producto.id_producto==idProductoSeleccionado:
-               Producto.productos.remove(producto)
-               break
-         
-         tabla.delete(idProductoSeleccionado)
+        seleccion = tabla.selection()
 
-         
-        print(len(Producto.productos)) 
+        if not seleccion:
+            messagebox.showerror("Error", "Producto no seleccionado")
+            return
+
+        idProductoSeleccionado = seleccion[0]
+
+        for producto in Producto.productos:
+            if producto.id_producto == idProductoSeleccionado:
+                Producto.productos.remove(producto)
+                break
+
+        tabla.delete(idProductoSeleccionado)
+        messagebox.showinfo("", "Producto eliminado correctamente")
+        print(len(Producto.productos))
 
     botonEditar = tk.Button(
         contenedorBotones,
@@ -88,6 +166,5 @@ def mostrar_tabla(ventana):
 
     botonEditar.pack(side="left")
     botonEliminar.pack(side="left")
-
 
     return tabla

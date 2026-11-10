@@ -2,6 +2,14 @@
 import tkinter as tk
 import uuid
 from Modelos.Productos import Producto
+from tkinter import messagebox
+from Validaciones.ValidacionProducto import (
+    validar_nombre,
+    validar_precio,
+    validar_stock,
+    validar_categoria,
+    validar_codigoBarra
+)
 
 
 def mostrar_formulario(ventana, tabla):
@@ -33,46 +41,78 @@ def mostrar_formulario(ventana, tabla):
     labelCodigoBarra.grid(row=4, column=0)
     inputCodigoBarra.grid(row=4, column=1)
 
-
-
     def generar_id():
         return str(uuid.uuid4())
 
     def crear_producto():
+
         nombre = inputNombre.get()
-        precio = float(inputPrecio.get())
-        stock = int(inputStock.get())
+        precio = inputPrecio.get()
+        stock = inputStock.get()
         categoria = inputCategoria.get()
         codigoBarra = inputCodigoBarra.get()
         descripcion = ""
-    
+
+        if not validar_nombre(nombre):
+            return
+
+        if not validar_precio(precio):
+            return
+
+        if not validar_stock(stock):
+            return
+
+        if not validar_categoria(categoria):
+            return
+
+        if not validar_codigoBarra(codigoBarra):
+            return
+
         for p in Producto.productos:
             if str(p.getCodigoBarra()).strip() == codigoBarra.strip():
-                from tkinter import messagebox
-                messagebox.showerror("Código duplicado", f"El código '{codigoBarra}' ya pertenece al producto: {p.getNombre()}")
+                messagebox.showerror(
+                    "Código duplicado",
+                    f"El código '{codigoBarra}' ya pertenece al producto: {p.getNombre()}"
+                )
                 return
+
+        precio = float(precio)
+        stock = int(stock)
+
         id_producto = generar_id()
-        
-        Producto(nombre,precio,stock,descripcion,categoria,id_producto,codigoBarra)
-        print(len(Producto.productos))
-        
+
+        Producto(
+            nombre,
+            precio,
+            stock,
+            descripcion,
+            categoria,
+            id_producto,
+            codigoBarra
+        )
+
+        if stock == 0:
+            estado = "Sin stock"
+        elif stock <= 5:
+            estado = "Stock bajo"
+        else:
+            estado = "Disponible"
 
         tabla.insert(
             "",
-            tk.END,
+            "end",
             iid=id_producto,
             values=(
-                nombre,
-                precio,
-                stock,
-                categoria,
-                codigoBarra
-            )
-        )
+            nombre,
+            precio,
+            stock,
+            categoria,
+            codigoBarra,
+            estado
+                )
+)
 
-
-        
-    
+        messagebox.showinfo("", "Producto creado correctamente")
 
     botonCrear = tk.Button(
         formulario,

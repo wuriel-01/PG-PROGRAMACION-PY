@@ -1,16 +1,28 @@
 
 import tkinter as tk
+from tkinter import messagebox
 from Modelos.Productos import Producto
+from Validaciones.ValidacionProducto import (
+    validar_nombre,
+    validar_precio,
+    validar_stock,
+    validar_categoria,
+    validar_codigoBarra
+)
 
 
 def abrir_formulario_edicion(idProducto, tabla):
+
     ProductoSelecionado = None
 
     for producto in Producto.productos:
         if producto.id_producto == idProducto:
             ProductoSelecionado = producto
             break
-        
+
+    if ProductoSelecionado is None:
+        return
+
     ventanaEditar = tk.Toplevel()
     ventanaEditar.title("Editar producto")
     ventanaEditar.geometry("400x400")
@@ -53,16 +65,50 @@ def abrir_formulario_edicion(idProducto, tabla):
 
     def aceptar_edicion():
         nombre = inputNombre.get()
-        precio = float(inputPrecio.get())
-        stock = int(inputStock.get())
+        precio = inputPrecio.get()
+        stock = inputStock.get()
         categoria = inputCategoria.get()
         codigoBarra = inputCodigoBarra.get()
+
+        if not validar_nombre(nombre):
+            return
+
+        if not validar_precio(precio):
+            return
+
+        if not validar_stock(stock):
+            return
+
+        if not validar_categoria(categoria):
+            return
+
+        if not validar_codigoBarra(codigoBarra):
+            return
+
+        for p in Producto.productos:
+            if p != ProductoSelecionado and p.getCodigoBarra().strip() == codigoBarra.strip():
+                messagebox.showerror(
+                    "Código duplicado",
+                    f"El código '{codigoBarra}' ya pertenece al producto: {p.getNombre()}",
+                    parent=ventanaEditar
+                )
+                return
+
+        precio = float(precio)
+        stock = int(stock)
 
         ProductoSelecionado.setNombre(nombre)
         ProductoSelecionado.setPrecio(precio)
         ProductoSelecionado.setStock(stock)
         ProductoSelecionado.setCategoria(categoria)
         ProductoSelecionado.setCodigoBarra(codigoBarra)
+
+        if stock == 0:
+            estado = "Sin stock"
+        elif stock <= 5:
+            estado = "Stock bajo"
+        else:
+            estado = "Disponible"
 
         tabla.item(
             idProducto,
@@ -71,8 +117,15 @@ def abrir_formulario_edicion(idProducto, tabla):
                 precio,
                 stock,
                 categoria,
-                codigoBarra
+                codigoBarra,
+                estado
             )
+        )
+
+        messagebox.showinfo(
+            "Éxito",
+            "Producto editado correctamente",
+            parent=ventanaEditar
         )
 
         ventanaEditar.destroy()
