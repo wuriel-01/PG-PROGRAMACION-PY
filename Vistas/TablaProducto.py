@@ -18,6 +18,31 @@ def mostrar_tabla(ventana):
         text="Código de Barra:"
     ).pack(side="left", padx=5)
 
+
+    estilo = ttk.Style()
+    estilo.theme_use("clam")
+
+   
+    estilo.configure(
+        "Treeview.Heading",
+        background="#1F497D",
+        foreground="white",
+        font=("Segoe UI", 10, "bold"),
+        padding=6
+    )
+
+
+    estilo.configure(
+        "Treeview",
+        background="#FFFFFF",
+        foreground="#333333",
+        rowheight=26,
+        fieldbackground="#FFFFFF",
+        font=("Segoe UI", 9)
+    )
+
+  
+    estilo.map("Treeview", background=[("selected", "#0078D7")])
     entryBusqueda = tk.Entry(contenedorBusqueda)
     entryBusqueda.pack(side="left", padx=5)
 
@@ -107,7 +132,13 @@ def mostrar_tabla(ventana):
     tabla.heading("Categoria", text="Categoria")
     tabla.heading("Codigo de Barra", text="Codigo de Barra")
     tabla.heading("Estado", text="Estado")
-
+    
+    tabla.column("Nombre", width=140, anchor="w")
+    tabla.column("Precio", width=70, anchor="center")
+    tabla.column("Stock", width=60, anchor="center")
+    tabla.column("Categoria", width=110, anchor="center")
+    tabla.column("Codigo de Barra", width=130, anchor="center")
+    tabla.column("Estado", width=90, anchor="center")
     scrollbar = ttk.Scrollbar(
         contenedor,
         orient="vertical",
@@ -163,8 +194,9 @@ def mostrar_tabla(ventana):
         text="Eliminar",
         command=eliminar_producto
     )
+    contenedorBotones = tk.Frame(contenedor)
+    contenedorBotones.pack(pady=10)
 
-    botonEditar.pack(side="left")
-    botonEliminar.pack(side="left")
-
+    tk.Button(contenedorBotones, text="Editar", command=editar_producto, bg="#1F497D", fg="white").pack(side="left", padx=5)
+    tk.Button(contenedorBotones, text="Eliminar", command=eliminar_producto, bg="#C00000", fg="white").pack(side="left", padx=5)
     return tabla
